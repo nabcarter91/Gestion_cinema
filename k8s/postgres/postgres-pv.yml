@@ -1,0 +1,27 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: postgres-pv
+  namespace: fastapi-project
+  labels:
+    type: local
+    app: film
+spec:
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  capacity:
+    storage: 2Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  local:
+    #path: /run/desktop/mnt/host/e/postgres-data   # <-- if running with docker desktop in windows
+     path: /data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - node01 # <-- name of the node (node01, node02) etc.

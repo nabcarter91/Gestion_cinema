@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: film-service
+  namespace: fastapi-film
+  labels:
+    app: film
+spec:
+  selector:
+    app: film-app
+  ports:
+    - port: 5000
+      targetPort: 5000

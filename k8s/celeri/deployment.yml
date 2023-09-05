@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-deployment
+  namespace: fastapi-film
+  labels:
+    app: film
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: celery-app
+  template:
+    metadata:
+      labels:
+        app: celery-app
+    spec:
+      initContainers:
+        - name: init-redis-service
+          image: busybox:1.28
+          command: [ 'sh', '-c', "until nslookup redis-service.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for redis-service; sleep 2; done" ]
+
+      containers:
+        - image: mukulmantosh/film-fastapi:latest
+          command: ['celery', '-A', 'main.celery', 'worker', '-l', 'info']
+          envFrom:
+            - secretRef:
+                name: celery-secret
+          name: celery-container
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "0.5"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
